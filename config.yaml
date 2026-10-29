@@ -1,0 +1,83 @@
+# network:
+#   interface: null          # set to e.g. "eth0" or "enp3s0"; null = scapy auto-detect
+#   sniff_filter: "ip"
+#   window_seconds: 2        # sliding aggregation window per source IP
+
+# honeypot:
+#   enabled: true          # run the honeypot automatically with the pipeline
+#   port: 2222
+#   db_path: data/live_events.db
+#   banner: "SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.6"
+#   start_timeout: 5.0     # seconds to wait for the port to be listening
+
+# classifier:
+#   model_path: data/network_model.pkl
+#   confidence_threshold: 0.70   # minimum top-class probability to act
+#   confidence_margin: 0.10      # min top-1 minus top-2 gap (adaptive threshold)
+#   features:
+#     - packets_per_sec
+#     - avg_packet_size
+#     - unique_ports
+
+# firewall:
+#   backend: iptables        # "iptables" or "nftables"
+#   auto_flush_on_exit: true
+
+# alerts:
+#   cooldown_seconds: 60   # suppress redundant alerts + duplicate rows per source IP
+#   telegram:
+#     enabled: true
+#     # credentials loaded from environment — see .env.example
+#     bot_token_env: TELEGRAM_BOT_TOKEN
+#     chat_id_env:   TELEGRAM_CHAT_ID
+
+# geo:
+#   provider: ip-api.com
+#   cache_ttl_seconds: 3600
+
+# logging:
+#   level: INFO
+#   format: "%(asctime)s  %(levelname)-8s  %(message)s"
+
+network:
+  interface: null
+  window_seconds: 2
+  sniff_filter: "ip"
+
+honeypot:
+  enabled: true
+  port: 2222
+  db_path: "data/live_events.db"
+
+classifier:
+  features:
+    - packets_per_sec
+    - avg_packet_size
+    - unique_ports
+    - syn_ratio
+  confidence_threshold: 0.85
+  confidence_margin: 0.10
+
+firewall:
+  backend: "iptables"
+
+alerts:
+  cooldown_seconds: 60
+  telegram:
+    enabled: true
+    bot_token_env: "TELEGRAM_BOT_TOKEN"
+    chat_id_env: "TELEGRAM_CHAT_ID"
+
+whitelist:
+  enabled: true
+  ips:
+    - "127.0.0.1"
+    - "::1"
+  subnets: []
+
+detection:
+  scan_window_seconds: 120.0
+  min_scan_ports: 20
+  min_syn_ratio: 0.75
+  max_scan_pkt_size: 120.0
+
